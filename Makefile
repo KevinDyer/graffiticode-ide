@@ -6,3 +6,6 @@ test: build
 
 build:
 	npm run build
+
+heroku:
+	git push heroku deploy-main:main
