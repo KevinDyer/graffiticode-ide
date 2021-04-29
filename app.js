@@ -364,7 +364,6 @@ function sendData(auth, id, req, res) {
     refresh: refresh,
     dontSave: dontSave,
   };
-  const t0 = new Date;
   compileID(auth, id, options, (err, obj) => {
     if (err && err.length) {
       console.trace(err);
