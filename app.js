@@ -70,7 +70,7 @@ if (env === 'development') {
   }));
 }
 
-app.set('views', __dirname + '/views');
+app.set('views', __dirname + '/src/client/views');
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false, limit: 100000000 }));
 app.use(bodyParser.text({limit: '50mb'}));
