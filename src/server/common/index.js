@@ -6,7 +6,7 @@ const {
   getCache,
   setCache,
 } = require('./../cache');
-const { nilID, decodeID, encodeID } = require('./../id');
+const { nilID, decodeID, encodeID } = require('./../../common/id');
 const main = require('./../main');
 const {
   incrementViews,

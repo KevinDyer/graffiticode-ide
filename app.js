@@ -9,14 +9,14 @@ const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
 const errorHandler = require("errorhandler");
 const cors = require('cors');
-const { pingLang } = require('./src/api');
-const { compileID, parse } = require('./src/common');
+const { pingLang } = require('./src/server/api');
+const { compileID, parse } = require('./src/server/common');
 const {
   decodeID,
   encodeID,
   nilID,
-} = require('./src/id');
-const routes = require('./src/routes');
+} = require('./src/common/id.js');
+const routes = require('./src/server/routes');
 const {
   // Database
   dbQuery,
@@ -34,14 +34,14 @@ const {
   itemToID,
   updatePiece,
   updatePieceAST,
-} = require('./src/storage');
+} = require('./src/server/storage');
 const {
   parseJSON,
   cleanAndTrimObj,
   cleanAndTrimSrc,
   isNonEmptyString,
   statusCodeFromErrors,
-} = require('./src/utils');
+} = require('./src/server/utils');
 
 // Configuration
 const LOCAL_COMPILES = process.env.LOCAL_COMPILES === 'true' || false;
@@ -920,7 +920,7 @@ app.get('/:lang/*', (req, res, next) => {
       }
     });
   } else {
-    const fullPath = `${__dirname}/public${path}`;
+    const fullPath = `${__dirname}/src/server/public${path}`;
     console.log("GET /:lang fullPath=" + fullPath);
     res.sendFile(fullPath);
   }

@@ -46,7 +46,7 @@ describe('app', () => {
     // Act
     await request(app)
       .get('/lang')
-      .query({id: 113})
+      .query({id: 0})
       .expect(302, `Found. Redirecting to /item?id=${itemid}`);
 
     // Assert

@@ -1,6 +1,6 @@
 const assert = require('assert');
 const pg = require('pg');
-const { decodeID, encodeID } = require('./../id');
+const { decodeID, encodeID } = require('./../../common/id.js');
 const {
   cleanAndTrimObj,
   cleanAndTrimSrc,

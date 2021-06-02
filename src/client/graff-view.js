@@ -4,7 +4,7 @@ import {
   assert,
   decodeID,
   encodeID,
-} from "./share.js"
+} from "../common/share.js"
 
 window.gcexports.ReactDOM = ReactDOM;
 window.gcexports.decodeID = decodeID;

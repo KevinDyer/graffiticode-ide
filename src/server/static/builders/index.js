@@ -1,5 +1,5 @@
 const { compileID } = require('./../../common');
-const { decodeID } = require('./../../id');
+const { decodeID } = require('./../../../common/id.js');
 const { getPiece } = require('./../../storage');
 
 const { buildWebpackBuilder } = require('./webpack');

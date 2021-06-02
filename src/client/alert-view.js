@@ -7,7 +7,7 @@ import {
   reserveCodeRange,
   decodeID,
   encodeID,
-} from "./share.js"
+} from "../common/share.js"
 class AlertView extends React.Component {
   constructor(props) {
     super(props);

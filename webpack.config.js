@@ -6,13 +6,13 @@ const {GenerateSW} = require('workbox-webpack-plugin');
 module.exports = () => {
   return {
     entry: {
-      views: './src/views.js',
-      form: './src/form.js',
+      views: './src/client/views.js',
+      form: './src/client/form.js',
     },
     output: {
       filename: 'bundle.js',
       filename: '[name].bundle.js',
-      path: path.resolve(__dirname, './../dist'),
+      path: path.resolve(__dirname, './dist'),
     },
     module: {
       rules: [
@@ -40,7 +40,7 @@ module.exports = () => {
     plugins: [
       new CleanWebpackPlugin({ cleanStaleWebpackAssets: true }),
       new CopyPlugin({
-        patterns: [{ from: 'public' }]
+        patterns: [{ from: './src/server/public' }]
       }),
       new GenerateSW({
         swDest: 'sw.js',
