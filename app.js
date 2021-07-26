@@ -5,17 +5,12 @@ const http = require('http');
 const https = require('https');
 const app = module.exports = express();
 const morgan = require("morgan");
-const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
 const errorHandler = require("errorhandler");
 const cors = require('cors');
-const { pingLang } = require('./src/api');
+const { pingLang, getLangAsset } = require('./src/api');
 const { compileID, parse } = require('./src/common');
-const {
-  decodeID,
-  encodeID,
-  nilID,
-} = require('./src/id');
+const { decodeID, encodeID } = require('./src/id');
 const routes = require('./src/routes');
 const {
   // Database
@@ -72,15 +67,11 @@ if (env === 'development') {
 
 app.set('views', __dirname + '/views');
 app.use(cors());
-app.use(bodyParser.urlencoded({ extended: false, limit: 100000000 }));
-app.use(bodyParser.text({limit: '50mb'}));
-app.use(bodyParser.raw({limit: '50mb'}));
-app.use(bodyParser.json({ type: 'application/json', limit: '50mb' }));
+app.use(express.urlencoded({ extended: false, limit: 100000000 }));
+app.use(express.text({limit: '50mb'}));
+app.use(express.raw({limit: '50mb'}));
+app.use(express.json({ type: 'application/json', limit: '50mb' }));
 app.use(methodOverride());
-app.use(function (err, req, res, next) {
-  console.error(err.stack);
-  res.sendStatus(500);
-});
 app.engine('html', function (templateFile, options, callback) {
   fs.readFile(templateFile, function (err, templateData) {
     const template = _.template(String(templateData));
@@ -877,7 +868,7 @@ function num2dot(num) {
 
 const assetCache = new Map();
 const assetCacheTtlMs = 5 * 60 * 1000;
-app.get('/:lang/*', (req, res, next) => {
+app.get('/:lang/:rest', (req, res, next) => {
   // /L106/lexicon.js
   const lang = req.params.lang;
   const langRegex = new RegExp('[Ll]\\d+');
@@ -885,38 +876,29 @@ app.get('/:lang/*', (req, res, next) => {
     next();
     return;
   }
+
   const path = req.url;
   if (!LOCAL_COMPILES && assetCache.has(path)) {
     res.send(assetCache.get(path));
-  } else if (lang.charAt(0) === 'L') {
-    pingLang(lang, (pong) => {
-      if (pong) {
-        const options = {
-          host: getAPIHost(lang),
-          port: getAPIPort(lang),
-          path: path,
-        };
-        const protocol = LOCAL_COMPILES && http || https;
-        protocol.get(options, (apiRes) => {
-          const chunks = [];
-          apiRes
-            .on('error', (err) => {
-              console.log(`ERROR GET /${lang}/ api call err=${err.message}`);
-              res.sendStatus(500);
-            })
-            .on('data', (chunk) => chunks.push(chunk))
-            .on('end', () => {
-              const data = chunks.join('');
-              // Only save if request is not an error
-              if (apiRes.statusCode < 400) {
-                assetCache.set(path, data);
-                setTimeout(() => assetCache.delete(path), assetCacheTtlMs);
-              }
-              res.status(apiRes.statusCode).send(data);
-            });
-        });
-      } else {
+    return;
+  }
+  
+  if (lang.charAt(0) === 'L') {
+    pingLang(lang, async (pong) => {
+      if (!pong) {
         res.sendStatus(404);
+        return;
+      }
+      try {
+        const assetPath = req.params.rest;
+        const data = await getLangAsset(lang, assetPath);
+        assetCache.set(path, data);
+        setTimeout(() => assetCache.delete(path), assetCacheTtlMs);
+        res.status(200).send(data);
+      } catch (err) {
+        console.log(err);
+        console.log(Object.keys(err));
+        res.sendStatus(500);
       }
     });
   } else {
@@ -1050,6 +1032,11 @@ if (env === 'development') {
 } else {
   app.use(errorHandler());
 }
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.sendStatus(500);
+});
 
 // Client login
 const clientAddress = process.env.ARTCOMPILER_CLIENT_ADDRESS

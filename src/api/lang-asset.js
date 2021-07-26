@@ -1,13 +1,18 @@
 exports.buildGetLangAsset = ({ getBuffer }) => {
   return async function getLangAsset(lang, path, resume) {
-    if (!(typeof resume === 'function')) {
-      console.trace();
-    }
+    const isFn = (typeof resume === 'function');
     try {
       const data = await getBuffer(`/${lang}/${path}`);
-      resume(null, data);
+      if (isFn) {
+        resume(null, data);
+      }
+      return data;
     } catch(err) {
-      resume(err);
+      if (isFn) {
+        resume(err, null);
+      } else {
+        throw err;
+      }
     }
   };
 };
