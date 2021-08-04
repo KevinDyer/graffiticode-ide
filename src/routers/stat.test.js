@@ -52,7 +52,7 @@ describe('routes/stat', () => {
         if (err) {
           return done(err);
         }
-        expect(lastQuery).to.equal(`SELECT userID, itemID, mark, label FROM items WHERE itemID='123'`);
+        expect(lastQuery).toEqual(`SELECT userID, itemID, mark, label FROM items WHERE itemID='123'`);
         done();
       });
   });
@@ -67,7 +67,7 @@ describe('routes/stat', () => {
         if (err) {
           return done(err);
         }
-        expect(lastQuery).to.equal(`SELECT userID, itemID, mark, label FROM items WHERE itemID='123'`);
+        expect(lastQuery).toEqual(`SELECT userID, itemID, mark, label FROM items WHERE itemID='123'`);
         done();
       });
   });
@@ -82,7 +82,7 @@ describe('routes/stat', () => {
         if (err) {
           return done(err);
         }
-        expect(lastQuery).to.equal(`SELECT userID, itemID, mark, label FROM items WHERE itemID='123'`);
+        expect(lastQuery).toEqual(`SELECT userID, itemID, mark, label FROM items WHERE itemID='123'`);
         done();
       });
   });
@@ -105,7 +105,7 @@ describe('routes/stat', () => {
         if (err) {
           return done(err);
         }
-        expect(lastQuery).to.equal(`UPDATE items SET mark='1' WHERE itemID='123'`);
+        expect(lastQuery).toEqual(`UPDATE items SET mark='1' WHERE itemID='123'`);
         done();
       });
   });
@@ -121,7 +121,7 @@ describe('routes/stat', () => {
         if (err) {
           return done(err);
         }
-        expect(lastQuery).to.equal(`UPDATE items SET mark=null  WHERE itemID='123'`);
+        expect(lastQuery).toEqual(`UPDATE items SET mark=null  WHERE itemID='123'`);
         done();
       });
   });

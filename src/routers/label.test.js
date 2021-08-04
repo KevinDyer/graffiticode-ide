@@ -36,7 +36,7 @@ describe('routes/label', () => {
         if (err) {
           return done(err);
         }
-        expect(lastQuery).to.equal(`SELECT label FROM pieces WHERE id = '123'`);
+        expect(lastQuery).toEqual(`SELECT label FROM pieces WHERE id = '123'`);
         done();
       });
   });
@@ -51,7 +51,7 @@ describe('routes/label', () => {
         if (err) {
           return done(err);
         }
-        expect(lastQuery).to.equal(`SELECT label FROM pieces WHERE id = '123'`);
+        expect(lastQuery).toEqual(`SELECT label FROM pieces WHERE id = '123'`);
         done();
       });
   });
@@ -66,7 +66,7 @@ describe('routes/label', () => {
         if (err) {
           return done(err);
         }
-        expect(lastQuery).to.equal(`SELECT label FROM pieces WHERE id = '123'`);
+        expect(lastQuery).toEqual(`SELECT label FROM pieces WHERE id = '123'`);
         done();
       });
   });
@@ -79,7 +79,7 @@ describe('routes/label', () => {
         if (err) {
           return done(err);
         }
-        expect(lastQuery).to.equal(`SELECT label FROM pieces WHERE id = '0'`);
+        expect(lastQuery).toEqual(`SELECT label FROM pieces WHERE id = '0'`);
         done();
       });
   });
@@ -95,7 +95,7 @@ describe('routes/label', () => {
         if (err) {
           return done(err);
         }
-        expect(lastQuery).to.equal(`UPDATE pieces SET label = 'foo' WHERE id = '123'`);
+        expect(lastQuery).toEqual(`UPDATE pieces SET label = 'foo' WHERE id = '123'`);
         done();
       });
   });
@@ -111,7 +111,7 @@ describe('routes/label', () => {
         if (err) {
           return done(err);
         }
-        expect(lastQuery).to.equal(`UPDATE pieces SET label = 'foo' WHERE id = '123'`);
+        expect(lastQuery).toEqual(`UPDATE pieces SET label = 'foo' WHERE id = '123'`);
         done();
       });
   });

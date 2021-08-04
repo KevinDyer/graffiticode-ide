@@ -3,9 +3,7 @@ const _ = require('underscore');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
-const app = module.exports = express();
 const morgan = require("morgan");
-const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
 const errorHandler = require("errorhandler");
 const cors = require('cors');
@@ -14,9 +12,8 @@ const { compileID, parse } = require('./src/common');
 const {
   decodeID,
   encodeID,
-  nilID,
 } = require('./src/id');
-const routes = require('./src/routes');
+const routes = require('./src/routers');
 const {
   // Database
   dbQuery,
@@ -49,6 +46,7 @@ const API_HOST = process.env.API_HOST || "api.acx.ac";
 
 const env = process.env.NODE_ENV || 'development';
 
+const app = module.exports = express();
 app.all('*', function (req, res, next) {
   if (req.headers.host.match(/^localhost/) === null) {
     if (req.headers['x-forwarded-proto'] !== 'https' && env === 'production') {
@@ -72,10 +70,10 @@ if (env === 'development') {
 
 app.set('views', __dirname + '/views');
 app.use(cors());
-app.use(bodyParser.urlencoded({ extended: false, limit: 100000000 }));
-app.use(bodyParser.text({limit: '50mb'}));
-app.use(bodyParser.raw({limit: '50mb'}));
-app.use(bodyParser.json({ type: 'application/json', limit: '50mb' }));
+app.use(express.urlencoded({ extended: false, limit: 100000000 }));
+app.use(express.text({limit: '50mb'}));
+app.use(express.raw({limit: '50mb'}));
+app.use(express.json({ type: 'application/json', limit: '50mb' }));
 app.use(methodOverride());
 app.use(function (err, req, res, next) {
   console.error(err.stack);
@@ -89,9 +87,20 @@ app.engine('html', function (templateFile, options, callback) {
 });
 
 // Routes
+routes.registerRoutes({
+  app,
+  getPiece,
+  decodeID,
+  encodeID,
+  validateUser,
+  itemToID,
+  updatePieceAST,
+  postItem,
+  dot2num,
+});
 
 app.get("/", (req, res) => {
-  res.redirect(`https://${req.headers.host}/lang?id=0`);
+  res.redirect('/lang?id=0');
 });
 
 const aliases = {};
@@ -387,32 +396,6 @@ app.get("/d/:id", (req, res) => {
   sendData(authToken, req.params.id, req, res);
 });
 
-function sendCode(id, req, res) {
-  // Send the source code for an item.
-  const ids = decodeID(id);
-  const langID = ids[0];
-  const codeID = ids[1];
-  getPiece(codeID, (err, row) => {
-    if (!row) {
-      console.log("ERROR [1] GET /code");
-      res.sendStatus(404);
-    } else {
-      res.json({
-        src: row.src,
-        ast: typeof row.ast === "string" && parseJSON(row.ast) || row.ast,
-      });
-    }
-  });
-}
-
-app.get('/code', (req, res) => {
-  sendCode(req.query.id, req, res);
-});
-
-app.get("/c/:id", (req, res) => {
-  sendCode(req.params.id, req, res);
-});
-
 function postItem(lang, src, ast, obj, userID, parent, img, label, forkID, resume) {
   const parentID = decodeID(parent)[1];
   createPiece(forkID, parentID, userID, src, obj, lang, label, img, clientAddress, ast, (err, piece) => {
@@ -562,68 +545,6 @@ function getTip(id, resume) {
   }
 }
 
-app.post('/code', function (req, res) {
-  const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
-  const lang = body.language;
-  const langID = lang.charAt(0) === 'L' ? +lang.substring(1) : +lang;
-  const t0 = new Date;
-  validateUser(body.jwt, lang, (err, data) => {
-    if (err && err.length) {
-      console.log(`ERROR POST /code validateUser err=${err.message}`);
-      res.sendStatus(401);
-    } else {
-      // TODO user is known but might not have access to this operation. Check
-      // user id against registered user table for this host.
-      // Map AST or SRC into OBJ. Store OBJ and return ID.
-      // Compile AST or SRC to OBJ. Insert or add item.
-      const { forkID=0, src, ast, parent=0 } = body;
-      const ip = req.headers['x-forwarded-for'] ||
-        req.connection.remoteAddress ||
-        req.socket.remoteAddress ||
-        req.connection.socket.remoteAddress;
-      const user = +body.userID || dot2num(ip);  // Use IP address if userID not avaiable.
-      itemToID(user, lang, ast, (err, itemID) => {
-        if (err) {
-          itemID = null;
-        }
-        compileInternal({ res, itemID });
-      });
-      function compileInternal({ res, itemID }) {
-        const img = '';
-        const obj = '';
-        const label = 'show';
-        if (itemID) {
-          const ids = [langID, itemID, 0];
-          const id = encodeID(ids);
-          updatePieceAST(itemID, user, lang, ast, (err) => {
-            if (err && err.length) {
-              console.log(`ERROR POST /code updatePiece err=${err.message}`);
-              res.sendStatus(500);
-            } else {
-              console.log(`POST /code?id=${ids.join('+')} (${id}) in ${(new Date - t0)}ms (update)`);
-              res.json({id});
-            }
-          });
-        } else {
-          postItem(lang, src, ast, obj, user, parent, img, label, forkID, (err, codeID) => {
-            if (err && err.length) {
-              console.log(`ERROR POST /code postItem err=${err.message}`);
-              res.sendStatus(500);
-            } else {
-              if (forkID === 0) {
-                forkID = id;
-              }
-              const ids = [langID, codeID, 0];
-              const id = encodeID(ids);
-              console.log(`POST /code?id=${ids.join('+')} (${id}) in ${(new Date - t0)}ms (post)`);
-              res.json({forkID, id});
-            }
-          });
-        }
-      }
-    }
-  });
-});
 function putData(auth, data, resume) {
   // Store an object as an L113 item.
   if (!data || !Object.keys(data).length) {

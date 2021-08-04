@@ -69,7 +69,7 @@
     "build": "webpack --config config/webpack.config.js --mode production",
     "build:dev": "webpack --config config/webpack.config.js --mode development",
     "start": "npm run build:dev && node app.js",
-    "test": "jest --config config/jest.config.js",
+    "test": "jest",
     "watch": "nodemon -w src -w public -w views -w app.js -w package.json --exec make"
   }
 }

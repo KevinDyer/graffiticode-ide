@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { decodeID } = require('./../id');
+const { decodeID } = require('../id');
 
 module.exports = (dbQuery) => {
   const router = new Router();
