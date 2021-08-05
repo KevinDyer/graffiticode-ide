@@ -67,8 +67,7 @@ function parseJSON(str) {
   try {
     return JSON.parse(str);
   } catch (err) {
-    console.log(err.stack);
-    console.log(`ERROR parseJSON: '${str}'`);
+    console.trace(err.message);
     return null;
   }
 }
