@@ -1,7 +1,6 @@
 const express = require('express');
 const _ = require('underscore');
 const fs = require('fs');
-const http = require('http');
 const https = require('https');
 const app = module.exports = express();
 const morgan = require("morgan");
@@ -67,13 +66,13 @@ if (env === 'development') {
 
 app.set('views', __dirname + '/views');
 app.use(cors());
-app.use(express.urlencoded({ extended: false, limit: 100000000 }));
+app.use(express.urlencoded({ extended: false, limit: '100mb' }));
 app.use(express.text({limit: '50mb'}));
 app.use(express.raw({limit: '50mb'}));
 app.use(express.json({ type: 'application/json', limit: '50mb' }));
 app.use(methodOverride());
-app.engine('html', function (templateFile, options, callback) {
-  fs.readFile(templateFile, function (err, templateData) {
+app.engine('html', (templateFile, options, callback) => {
+  fs.readFile(templateFile, (err, templateData) => {
     const template = _.template(String(templateData));
     callback(err, template(options));
   });
@@ -81,9 +80,7 @@ app.engine('html', function (templateFile, options, callback) {
 
 // Routes
 
-app.get("/", (req, res) => {
-  res.redirect(`https://${req.headers.host}/lang?id=0`);
-});
+app.get('/', (req, res) => res.redirect(`/lang?id=0`));
 
 const aliases = {};
 
